@@ -1,6 +1,6 @@
 # Grammar Variational Autoencoder
 
-This repository contains training and sampling code for the paper <a href="https://arxiv.org/abs/1703.01925">Grammar Variational Autoencoder</a>
+This repository contains training and sampling code for the paper: <a href="https://arxiv.org/abs/1703.01925">Grammar Variational Autoencoder</a>.
 
 
 ## Requirements
@@ -21,7 +21,7 @@ To create the molecule datasets, call:
 
 ### Equations
 
-The equation dataset can be downloaded here: [grammar](https://www.dropbox.com/s/yq1gpygw3oq1grq/eq2_grammar_dataset.h5?dl=0) [string](https://www.dropbox.com/s/gn3iq2ykrs0dqwb/eq2_str_dataset.h5?dl=0)
+The equation dataset can be downloaded here: [grammar](https://www.dropbox.com/s/yq1gpygw3oq1grq/eq2_grammar_dataset.h5?dl=0), [string](https://www.dropbox.com/s/gn3iq2ykrs0dqwb/eq2_str_dataset.h5?dl=0)
 
 
 ## Training
@@ -45,12 +45,12 @@ To train the molecule models, call:
 
 ### Molecules
 
-The file molecule_vae.py can be used to encode and decode SMILES strings. For a demo see:
+The file molecule_vae.py can be used to encode and decode SMILES strings. For a demo run:
 
 * `python encode_decode_zinc.py`
 
 ### Equations
 
-The analogous file equation_vae.py can encode and decode equation strings. See:
+The analogous file equation_vae.py can encode and decode equation strings. Run:
 
 * `python encode_decode_eq.py`
