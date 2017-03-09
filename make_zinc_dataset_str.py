@@ -1,9 +1,9 @@
 import numpy as np
 import pdb
-from molecules.utils import many_one_hot
+from models.utils import many_one_hot
 import h5py
 
-f = open('molecule-autoencoder/data/250k_rndm_zinc_drugs_clean.smi','r')
+f = open('data/250k_rndm_zinc_drugs_clean.smi','r')
 
 L = []
 chars = ['C', '(', ')', 'c', '1', '2', 'o', '=', 'O', 'N', '3', 'F', '[', '@', 'H', ']', 'n', '-', '#', 'S', 'l', '+', 's', 'B', 'r', '/', '4', '\\', '5', '6', '7', 'I', 'P', '8', ' ']
