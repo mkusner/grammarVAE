@@ -45,7 +45,7 @@ def main():
     XTE = data[0:5000]
     XTR = data[5000:]
 
-    np.random.seed(0)
+    np.random.seed(1)
     # 2. get any arguments and define save file, then create the VAE model
     args = get_arguments()
     print('L='  + str(args.latent_dim) + ' E=' + str(args.epochs))

@@ -41,7 +41,7 @@ def main():
     XTE = data[0:5000]
     XTR = data[5000:]
 
-    np.random.seed(0)
+    np.random.seed(1)
     # 2. get any arguments and define save file, then create the VAE model
     args = get_arguments()
     model_save = 'results/zinc_vae_str_L' + str(args.latent_dim) + '_E' + str(args.epochs) + '_val.hdf5'
