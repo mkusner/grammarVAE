@@ -9,3 +9,4 @@ pandas
 tables
 argparse
 progressbar
+nltk==3.2.2
