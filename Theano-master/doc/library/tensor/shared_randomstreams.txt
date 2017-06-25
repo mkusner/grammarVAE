@@ -1,0 +1,80 @@
+.. _libdoc_tensor_shared_randomstreams:
+
+======================================================
+:mod:`shared_randomstreams` -- Friendly random numbers
+======================================================
+
+.. module:: shared_randomstreams
+   :platform: Unix, Windows
+   :synopsis: symbolic random variables
+.. moduleauthor:: LISA
+
+Guide
+=====
+
+Since Theano uses a functional design, producing pseudo-random numbers in a
+graph is not quite as straightforward as it is in numpy.
+
+The way to think about putting randomness into Theano's computations is to
+put random variables in your graph.  Theano will allocate a numpy RandomState
+object for each such variable, and draw from it as necessary.  We will call this sort of sequence of
+random numbers a *random stream*.
+
+For an example of how to use random numbers, see
+:ref:`Using Random Numbers <using_random_numbers>`.
+
+
+Reference
+=========
+
+.. class:: RandomStreams(raw_random.RandomStreamsBase)
+
+    This is a symbolic stand-in for ``numpy.random.RandomState``. 
+    Random variables of various distributions are instantiated by calls to
+    parent class :class:`raw_random.RandomStreamsBase`.
+
+    .. method:: updates()
+
+        :returns: a list of all the (state, new_state) update pairs for the
+          random variables created by this object
+          
+        This can be a convenient shortcut to enumerating all the random
+        variables in a large graph in the ``update`` parameter of function.
+
+    .. method:: seed(meta_seed)
+
+        `meta_seed` will be used to seed a temporary random number generator,
+        that will in turn generate seeds for all random variables
+        created by this object (via `gen`).
+
+        :returns: None
+
+    .. method:: gen(op, *args, **kwargs)
+
+        Return the random variable from `op(*args, **kwargs)`, but
+        also install special attributes (``.rng`` and ``update``, see
+        :class:`RandomVariable` ) into it.
+
+        This function also adds the returned variable to an internal list so
+        that it can be seeded later by a call to `seed`.
+
+    .. method:: uniform, normal, binomial, multinomial, random_integers, ...
+
+        See :class:`raw_random.RandomStreamsBase`.
+
+.. class:: RandomVariable(object)
+
+    .. attribute:: rng
+
+        The shared variable whose ``.value`` is the numpy RandomState
+        generator feeding this random variable.
+
+    .. attribute:: update
+        
+        A pair
+        whose first element is a shared variable whose value is a numpy RandomState,
+        and whose second element is an [symbolic] expression for the next value of that
+        RandomState after drawing samples.
+        Including this pair in the``updates`` list to function will cause the
+        function to update the random number generator feeding this variable.
+

@@ -1,0 +1,217 @@
+
+.. _usingfunction:
+
+===========================================
+:mod:`function` - defines theano.function
+===========================================
+
+.. module:: function
+   :platform: Unix, Windows
+   :synopsis: defines theano.function and related classes
+.. moduleauthor:: LISA
+
+Guide
+=====
+
+This module provides :func:`function`, commonly accessed as `theano.function`,
+the interface for compiling graphs into callable objects.
+
+You've already seen example usage in the basic tutorial... something like this:
+
+>>> import theano
+>>> x = theano.tensor.dscalar()
+>>> f = theano.function([x], 2*x)
+>>> f(4)
+array(8.0)
+
+The idea here is that we've compiled the symbolic graph (``2*x``) into a function that can be called on a number and will do some computations.
+
+The behaviour of function can be controlled in several ways, such as
+:class:`In`, :class:`Out`, ``mode``, ``updates``, and ``givens``.  These are covered
+in the :ref:`tutorial examples <basictutexamples>` and :ref:`tutorial on modes <using_modes>`.
+
+Reference
+=========
+
+.. class:: In
+
+    A class for attaching information to function inputs.
+
+    .. attribute:: variable
+
+        A variable in an expression graph to use as a compiled-function parameter
+
+    .. attribute:: name
+
+        A string to identify an argument for this parameter in keyword arguments.
+
+    .. attribute:: value
+
+        The default value to use at call-time (can also be a Container where
+        the function will find a value at call-time.)
+
+    .. attribute:: update
+
+        An expression which indicates updates to the Value after each function call.
+
+    .. attribute:: mutable
+
+        ``True`` means the compiled-function is allowed to modify this
+        argument. ``False`` means it is not allowed.
+
+    .. attribute:: borrow
+
+        ``True`` indicates that a reference to internal storage may be returned, and that the caller is aware that subsequent function evaluations might overwrite this memory.
+
+    .. attribute:: strict
+
+      If ``False``, a function argument may be copied or cast to match the type
+      required by the parameter `variable`.  If ``True``, a function argument
+      must exactly match the type required by `variable`.
+
+    .. attribute:: allow_downcast
+
+        ``True`` indicates that the value you pass for this input can be silently downcasted to fit the right type, which may lose precision. (Only applies when `strict` is ``False``.)
+
+    .. attribute:: autoname
+
+        ``True`` means that the `name` is set to variable.name.
+
+    .. attribute:: implicit
+
+        ``True`` means that the input is implicit in the sense that the user is not allowed to provide a value for it. Requires 'value' to be set.
+        ``False`` means that the user can provide a value for this input.
+
+    .. method:: __init__(self, variable, name=None, value=None, update=None, mutable=None, strict=False, allow_downcast=None, autoname=True, implicit=None, borrow=None, shared=False)
+
+        Initialize attributes from arguments.
+
+.. class:: Out
+
+    A class for attaching information to function outputs
+
+    .. attribute:: variable
+
+        A variable in an expression graph to use as a compiled-function
+        output
+
+    .. attribute:: borrow
+
+        ``True`` indicates that a reference to internal storage may be returned, and that the caller is aware that subsequent function evaluations might overwrite this memory.
+
+    .. method:: __init__(variable, borrow=False)
+
+        Initialize attributes from arguments.
+
+
+.. function:: function(inputs, outputs, mode=None, updates=None, givens=None, no_default_updates=False, accept_inplace=False, name=None, rebuild_strict=True, allow_input_downcast=None, profile=None, on_unused_input='raise')
+
+    Return a :class:`callable object <theano.compile.function_module.Function>` that will calculate `outputs` from `inputs`.
+
+    :type params: list of either Variable or In instances, but not shared
+        variables.
+
+    :param params: the returned :class:`Function` instance will have
+      parameters for these variables.
+
+    :type outputs: list of Variables or Out instances
+
+    :param outputs: expressions to compute.
+
+    :type mode: None, string or :class:`Mode` instance.
+
+    :param mode: compilation mode
+
+    :type updates: iterable over pairs (shared_variable, new_expression).
+       List, tuple or dict.
+
+    :param updates: expressions for new :class:`SharedVariable` values
+
+    :type givens: iterable over pairs (Var1, Var2) of Variables.
+       List, tuple or dict.  The Var1
+       and Var2 in each pair must have the same Type.
+
+    :param givens: specific substitutions to make in the
+      computation graph (Var2 replaces Var1).
+
+    :type no_default_updates: either bool or list of Variables
+    :param no_default_updates:
+        if True, do not perform any automatic update on Variables.
+        If False (default), perform them all.
+        Else, perform automatic updates on all Variables that are
+        neither in ``updates`` nor in ``no_default_updates``.
+
+    :param name: an optional name for this function.
+      The profile mode will print the time spent in this function.
+
+    :param rebuild_strict: True (Default) is the safer and better
+        tested setting, in which case `givens` must substitute new
+        variables with the same Type as the variables they replace.
+        False is a you-better-know-what-you-are-doing setting, that
+        permits `givens` to replace variables with new variables of
+        any Type.  The consequence of changing a Type is that all
+        results depending on that variable may have a different Type
+        too (the graph is rebuilt from inputs to outputs).  If one of
+        the new types does not make sense for one of the Ops in the
+        graph, an Exception will be raised.
+
+    :type allow_input_downcast: Boolean or None
+    :param allow_input_downcast: True means that the values passed as
+        inputs when calling the function can be silently downcasted to
+        fit the dtype of the corresponding Variable, which may lose
+        precision.  False means that it will only be cast to a more
+        general, or precise, type. None (default) is almost like
+        False, but allows downcasting of Python float scalars to
+        floatX.
+
+    :type profile: None, True, or ProfileStats instance
+    :param profile: accumulate profiling information into a given
+        ProfileStats instance. If argument is `True` then a new
+        ProfileStats instance will be used.  This profiling object
+        will be available via self.profile.
+
+    :param on_unused_input: What to do if a variable in the 'inputs'
+        list is not used in the graph. Possible values are 'raise',
+        'warn', and 'ignore'.
+
+    :rtype: Function instance
+
+    :returns: a callable object that will compute the outputs (given the inputs)
+      and update the implicit function arguments according to the `updates`.
+
+
+    Inputs can be given as variables or In instances.
+    :class:`In` instances also have a variable, but they attach some extra
+    information about how call-time arguments corresponding to that variable
+    should be used.  Similarly, :class:`Out` instances can attach information
+    about how output variables should be returned.
+
+    The default is typically 'FAST_RUN' but this can be changed in
+    :doc:`theano.config <../config>`.  The mode
+    argument controls the sort of optimizations that will be applied to the
+    graph, and the way the optimized graph will be evaluated.
+
+    After each function evaluation, the `updates` mechanism can replace the
+    value of any SharedVariable [implicit] inputs with new values computed
+    from the expressions in the `updates` list.  An exception will be raised
+    if you give two update expressions for the same SharedVariable input (that
+    doesn't make sense).
+
+    If a SharedVariable is not given an update expression, but has a
+    ``default_update`` member containing an expression, this expression
+    will be used as the update expression for this variable.  Passing
+    ``no_default_updates=True`` to ``function`` disables this behavior
+    entirely, passing ``no_default_updates=[sharedvar1, sharedvar2]``
+    disables it for the mentioned variables.
+
+    Regarding givens: Be careful to make sure that these substitutions are
+    independent, because behaviour when Var1 of one pair appears in the graph leading
+    to Var2 in another expression is undefined (e.g. with ``{a: x, b: a + 1}``).
+    Replacements specified with
+    givens are different from optimizations in that Var2 is not expected to be
+    equivalent to Var1.
+
+.. autofunction:: theano.compile.function.function_dump
+
+.. autoclass:: theano.compile.function_module.Function
+   :members: free, copy

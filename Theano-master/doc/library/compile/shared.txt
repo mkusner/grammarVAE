@@ -1,0 +1,62 @@
+
+.. _libdoc_compile_shared:
+
+===========================================
+:mod:`shared` - defines theano.shared
+===========================================
+
+.. module:: theano.compile.sharedvalue
+   :platform: Unix, Windows
+   :synopsis: defines theano.shared and related classes
+.. moduleauthor:: LISA
+
+
+.. class:: SharedVariable
+
+    Variable with Storage that is shared between functions that it appears in.
+    These variables are meant to be created by registered *shared constructors*
+    (see :func:`shared_constructor`).
+
+    The user-friendly constructor is :func:`shared`
+
+    .. attribute:: value
+
+        Read/write access to the [non-symbolic] value/data associated with this SharedVariable.
+        
+        Changes to this value will be visible to all functions using this SharedVariable.  
+
+    .. method:: __init__(self, name, type, value, strict, container=None)
+
+        :param name: The name for this variable.
+        :type name: None or str
+
+        :param type: The :term:`Type` for this Variable.
+
+        :param value: A value to associate with this variable (a new container will be created).
+
+        :param strict: True -> assignments to ``self.value`` will not be casted
+          or copied, so they must have the correct type or an exception will be
+          raised.
+
+        :param container: The container to use for this variable.   This should
+           instead of the `value` parameter.  Using both is an error.
+
+    .. attribute:: container
+
+        A container to use for this SharedVariable when it is an implicit function parameter.
+
+        :type: class:`Container`
+
+.. autofunction:: shared
+
+.. function:: shared_constructor(ctor)
+
+    Append `ctor` to the list of shared constructors (see :func:`shared`).
+
+    Each registered constructor ``ctor`` will be called like this:
+
+    .. code-block:: python
+
+        ctor(value, name=name, strict=strict, **kwargs)
+
+    If it do not support given value, it must raise a TypeError.

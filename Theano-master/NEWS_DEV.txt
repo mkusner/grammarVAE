@@ -1,0 +1,17 @@
+.. _NEWS_DEV:
+
+===================
+DRAFT Release Notes
+===================
+
+git log -p rel-0.7... |grep Merge|grep '#[0123456789]' |cut -f 8 -d ' ' | sed 's\#\* https://github.com/Theano/Theano/pull/\'
+
+git shortlog -sn rel-0.7..
+
+
+
+Theano Development version
+==========================
+
+NEWS.txt:
+

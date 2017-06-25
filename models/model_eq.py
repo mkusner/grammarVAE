@@ -26,7 +26,7 @@ class MoleculeVAE():
                charset,
                max_length = MAX_LEN,
                latent_rep_size = 10,
-               hypers = {'hidden': 200, 'dense': 200, 'conv1': 2, 'conv2': 3, 'conv3': 4},
+               hypers = {'hidden': 100, 'dense': 100, 'conv1': 2, 'conv2': 3, 'conv3': 4},
                weights_file = None):
         charset_length = len(charset)
         self.hypers = hypers
@@ -144,5 +144,5 @@ class MoleculeVAE():
     def save(self, filename):
         self.autoencoder.save_weights(filename)
     
-    def load(self, charset, weights_file, latent_rep_size = 10, max_length=MAX_LEN, hypers = {'hidden': 200, 'dense': 200, 'conv1': 2, 'conv2': 3, 'conv3': 4}):
+    def load(self, charset, weights_file, latent_rep_size = 10, max_length=MAX_LEN, hypers = {'hidden': 100, 'dense': 100, 'conv1': 2, 'conv2': 3, 'conv3': 4}):
         self.create(charset, max_length = max_length, weights_file = weights_file, latent_rep_size = latent_rep_size, hypers = hypers)

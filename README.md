@@ -54,3 +54,56 @@ The file molecule_vae.py can be used to encode and decode SMILES strings. For a 
 The analogous file equation_vae.py can encode and decode equation strings. Run:
 
 * `python encode_decode_eq.py`
+
+## Bayesian optimization
+
+The Bayesian optimization eperiments use sparse Gaussian processes coded in theano.
+
+We use a modified version of theano with a few add ons, e.g. to compute
+the log determinant of a positive definite matrix in a numerically stable
+manner. The modified version of theano can be insalled by going to the folder
+Theano-master and typing
+
+* `python setup.py install`
+
+The experiments with molecules require which can be installed as described in 
+<a href="http://www.rdkit.org/docs/Install.html">http://www.rdkit.org/docs/Install.html</a>.
+
+The Bayesian optimization experiments can be replicated as follows:
+
+1 - Generate the latent representations of molecules and equations. For this, go to the folders
+
+molecule_optimization/latent_features_and_targets_grammar/
+molecule_optimization/latent_features_and_targets_character/
+
+equation_optimization/latent_features_and_targets_grammar/
+equation_optimization/latent_features_and_targets_character/
+
+and type
+
+* `python generate_latent_features_and_targets.py`
+
+2 - Go to the folders
+
+molecule_optimization/simulation1/grammar/
+molecule_optimization/simulation1/character/
+
+equation_optimization/simulation1/grammar/
+equation_optimization/simulation1/character/
+
+and type
+
+* `nohup python run_bo.py &`
+
+Repeat this step for all the simulation folders (simulation2,...,simulation10).
+For speed, it is recommended to do this in a computer cluster in parallel.
+
+2 - Extract the results by going to the folders
+
+molecule_optimization/
+equation_optimization/
+
+and typing
+
+* `python get_final_results.py`
+* `./get_average_test_RMSE_LL.sh`

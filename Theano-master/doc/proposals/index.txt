@@ -1,0 +1,14 @@
+:orphan:
+
+.. _proposals:
+
+==================================
+Proposals for new/revised features
+==================================
+
+.. toctree::
+    :maxdepth: 1
+    :glob:
+
+    *
+

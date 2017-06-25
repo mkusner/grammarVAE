@@ -1,0 +1,133 @@
+.. _how_to_release:
+
+==================================================
+How to make a release
+==================================================
+
+Update files
+============
+
+Update the NEWS.txt and move the old stuff in the HISTORY.txt file.
+To update the NEWS.txt file, check all ticket closed for this release
+and all commit log messages. Update the index.txt *News* section.
+
+Update the "Vision"/"Vision State" in the file
+``Theano/doc/introduction.txt``.
+
+Update the file ``.mailmap`` to clean up the list of contributor.
+
+Get a fresh copy of the repository
+==================================
+
+Clone the code::
+
+    git clone git@github.com:Theano/Theano.git Theano-0.X
+
+It does not have to be in your PYTHONPATH.
+
+Update the version number
+=========================
+
+Edit ``setup.py`` to contain the newest version number ::
+
+    cd Theano-0.X
+    vi setup.py     # Edit the MAJOR, MINOR, MICRO and SUFFIX
+
+``conf.py`` in the ``doc/`` directory should be updated in the following ways:
+
+ * Change the ``version`` and ``release`` variables to new version number.
+ * Change the upper copyright year to the current year if necessary.
+
+Update the year in the ``Theano/LICENSE.txt`` file too, if necessary.
+
+``NEWS.txt`` usually contains the name and date of the release, change them
+too.
+
+Update the code and the documentation for the theano flags
+``warn.ignore_bug_before`` to accept the new version. You must modify the
+file ``theano/configdefaults.py`` and ``doc/library/config.txt``.
+
+Tag the release
+===============
+
+You will need to commit the previous changes, tag the resulting version, and
+push that into the original repository. The syntax is something like the
+following::
+
+    git commit -m "Modifications for 0.X.Y release" setup.py doc/conf.py NEWS.txt HISTORY.txt theano/configdefaults.py doc/library/config.txt
+    git tag -a rel-0.X.Y
+    git push
+    git push --tags
+
+The documentation will be automatically regenerated in the next few hours.
+
+Generate and upload the package
+===============================
+
+For release candidates, only upload on PyPI.
+
+On PyPI
+-------
+
+Now change ``ISRELEASED`` in ``setup.py`` to ``True``.
+
+Finally, use setuptools to register and upload the release::
+
+    python setup.py register sdist --formats=gztar,zip upload
+
+This command register and uploads the package on pypi.python.org. To be able
+to do that, you must register on PyPI (you can create an new account, or use
+OpenID), and be listed among the "Package Index Owners" of Theano.
+
+There is a bug in some versions of distutils that raises a
+UnicodeDecodeError if there are non-ASCII characters in NEWS.txt. You
+would need to change NEWS.txt so it contains only ASCII characters (the
+problem usually comes from diacritics in people's names).
+
+On mloss.org
+------------
+
+Project page is at http://mloss.org/software/view/241/.
+Account jaberg is listed as submitter.
+
+1. log in as jaberg to mloss
+2. search for theano and click the logo
+3. press 'update this project' on the left and change
+
+  - the version number
+  - the download link
+  - the description of what has changed
+
+4. press save
+
+Make sure the "what's changed" text isn't too long because it will show up on
+the front page of mloss.  You have to indent bullet lines by 4 spaces I think in
+the description.
+
+You can "update this project" and save lots of times to get the revision text
+right. Just do not change the version number.
+
+
+Finally
+-------
+
+Change ``ISRELEASED`` back to ``False``.
+
+
+Announce the release
+====================
+
+Generate an e-mail from the template in in ``EMAIL.txt``, including content
+from ``NEWS.txt``, and send it to the following mailing lists:
+
+* theano-users
+* theano-announce
+* numpy-discussion@scipy.org
+* scipy-user@scipy.org
+* G+, Scientific Python: https://plus.google.com/communities/108773711053400791849
+
+For release candidates, only e-mail:
+
+* theano-announce
+* theano-dev
+* theano-users
