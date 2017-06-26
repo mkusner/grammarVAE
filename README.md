@@ -105,6 +105,7 @@ For speed, it is recommended to do this in a computer cluster in parallel.
 2 - Extract the results by going to the folders
 
 molecule_optimization/
+
 equation_optimization/
 
 and typing
