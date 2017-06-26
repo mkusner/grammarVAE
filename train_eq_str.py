@@ -12,7 +12,7 @@ import h5py
 
 MAX_LEN = 19
 DIM = 15
-LATENT = 10
+LATENT = 25
 EPOCHS = 50
 BATCH = 600
 
@@ -34,8 +34,8 @@ def main():
 
     # 1. get any arguments and define save file, then create the VAE model
     args = get_arguments()
-    params = {'hidden': 200, 'dense': 200, 'conv1': 2, 'conv2': 3, 'conv3': 4}
-    model_save = 'eq_vae_str_h' + str(params['hidden']) + '_c123_L' + str(args.latent_dim) + '_E' + str(args.epochs) + '.hdf5'
+    params = {'hidden': 100, 'dense': 100, 'conv1': 2, 'conv2': 3, 'conv3': 4}
+    model_save = 'eq_vae_str_h' + str(params['hidden']) + '_c234_L' + str(args.latent_dim) + '_E' + str(args.epochs) + '_batchB.hdf5'
     model = MoleculeVAE()
 
     # 2. if this results file exists already load it

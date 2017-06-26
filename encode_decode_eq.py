@@ -11,15 +11,15 @@ import pdb
 
 
 # 1. load grammar VAE
-grammar_weights = "pretrained/eq_vae_grammar_h200_c234_L10_E50_BN_val.hdf5"
+grammar_weights = "pretrained/eq_vae_grammar_h100_c234_L25_E50_batchB.hdf5"
 print(grammar_weights)
-grammar_model = equation_vae.EquationGrammarModel(grammar_weights, latent_rep_size=10)
+grammar_model = equation_vae.EquationGrammarModel(grammar_weights, latent_rep_size=25)
 
 # 2. let's encode and decode some example equations
-eq = ['3+sin(2+x)',
-      'x+exp(x/2)',
-      '2*x',
-      'exp(2/x)']
+eq = ['sin(x*2)',
+      'exp(x)+x',
+      'x/3',
+      '3*exp(2/x)']
 
 # z: encoded latent points
 # NOTE: this operation returns the mean of the encoding distribution
@@ -51,9 +51,9 @@ for i, s in enumerate(grammar_model.decode(z)):
 
 # 3. the character VAE (https://github.com/maxhodak/keras-molecules)
 # works the same way, let's load it
-char_weights = "pretrained/eq_vae_str_h200_c234_L10_E50_BN_val.hdf5"
+char_weights = "pretrained/eq_vae_str_h100_c234_L25_E50_batchB.hdf5"
 print(char_weights)
-char_model = equation_vae.EquationCharacterModel(char_weights, latent_rep_size=10)
+char_model = equation_vae.EquationCharacterModel(char_weights, latent_rep_size=25)
 
 
 # 4. encode and decode
