@@ -74,9 +74,11 @@ The Bayesian optimization experiments can be replicated as follows:
 1 - Generate the latent representations of molecules and equations. For this, go to the folders
 
 molecule_optimization/latent_features_and_targets_grammar/
+
 molecule_optimization/latent_features_and_targets_character/
 
 equation_optimization/latent_features_and_targets_grammar/
+
 equation_optimization/latent_features_and_targets_character/
 
 and type
