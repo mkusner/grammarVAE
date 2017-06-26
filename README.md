@@ -88,9 +88,11 @@ and type
 2 - Go to the folders
 
 molecule_optimization/simulation1/grammar/
+
 molecule_optimization/simulation1/character/
 
 equation_optimization/simulation1/grammar/
+
 equation_optimization/simulation1/character/
 
 and type
