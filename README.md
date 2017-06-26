@@ -57,7 +57,7 @@ The analogous file equation_vae.py can encode and decode equation strings. Run:
 
 ## Bayesian optimization
 
-The Bayesian optimization eperiments use sparse Gaussian processes coded in theano.
+The Bayesian optimization experiments use sparse Gaussian processes coded in theano.
 
 We use a modified version of theano with a few add ons, e.g. to compute
 the log determinant of a positive definite matrix in a numerically stable
@@ -66,7 +66,7 @@ Theano-master and typing
 
 * `python setup.py install`
 
-The experiments with molecules require which can be installed as described in 
+The experiments with molecules require the rdkit library, which can be installed as described in 
 <a href="http://www.rdkit.org/docs/Install.html">http://www.rdkit.org/docs/Install.html</a>.
 
 The Bayesian optimization experiments can be replicated as follows:
