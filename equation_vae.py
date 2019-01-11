@@ -1,13 +1,15 @@
 import nltk
 import re
-
+import sys
 import eq_grammar
 import molecule_vae
 import models.model_eq
 import models.model_eq_str
 import numpy as np
-
-
+import torch
+sys.path.append('../grammar_variational_autoencoder')
+from model import GrammarVariationalAutoEncoder 
+from molecule_vae import THEANO_MODE
 def tokenize(s):
     funcs = ['sin', 'exp']
     for fn in funcs: s = s.replace(fn+'(', fn+' ')
@@ -19,8 +21,8 @@ class EquationGrammarModel(molecule_vae.ZincGrammarModel):
     
     def __init__(self, weights_file, latent_rep_size=25):
         """ Load the (trained) equation encoder/decoder, grammar model. """
+        self._model = None
         self._grammar = eq_grammar
-        self._model = models.model_eq
         self.MAX_LEN = 15 # TODO: read from elsewhere
         self._productions = self._grammar.GCFG.productions()
         self._prod_map = {}
@@ -32,9 +34,15 @@ class EquationGrammarModel(molecule_vae.ZincGrammarModel):
         self._lhs_map = {}
         for ix, lhs in enumerate(self._grammar.lhs_list):
             self._lhs_map[lhs] = ix
-        self.vae = self._model.MoleculeVAE()
-        self.vae.load(self._productions, weights_file, max_length=self.MAX_LEN, latent_rep_size=latent_rep_size)
-
+        
+        if THEANO_MODE:
+            self._model = models.model_eq
+            self.vae = self._model.MoleculeVAE()
+            self.vae.load(self._productions, weights_file, max_length=self.MAX_LEN, latent_rep_size=latent_rep_size)
+        else:
+            self.vae = GrammarVariationalAutoEncoder() 
+            self.vae.load_state_dict(torch.load(weights_file))
+        
 
 class EquationCharacterModel(object):
 
