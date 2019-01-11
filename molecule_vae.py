@@ -1,10 +1,20 @@
 import nltk
 import numpy as np
-
+import torch
+import pdb
 import zinc_grammar
 import models.model_zinc
 import models.model_zinc_str
+import nltk
+import re
+from six.moves import xrange
 
+import eq_grammar
+STOCHASTIC = False
+THEANO_MODE = True
+device = None
+if not THEANO_MODE:
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def get_zinc_tokenizer(cfg):
     long_tokens = filter(lambda a: len(a) > 1, cfg._lexical_index.keys())
@@ -72,7 +82,8 @@ class ZincGrammarModel(object):
         """ Encode a list of smiles strings into the latent space """
         assert type(smiles) == list
         tokens = map(self._tokenize, smiles)
-        parse_trees = [self._parser.parse(t).next() for t in tokens]
+        # parse_trees = [self._parser.parse(t).next() for t in tokens]
+        parse_trees = [self._parser.parse(t).__next__() for t in tokens]
         productions_seq = [tree.productions() for tree in parse_trees]
         indices = [np.array([self._prod_map[prod] for prod in entry], dtype=int) for entry in productions_seq]
         one_hot = np.zeros((len(indices), self.MAX_LEN, self._n_chars), dtype=np.float32)
@@ -81,9 +92,18 @@ class ZincGrammarModel(object):
             one_hot[i][np.arange(num_productions),indices[i]] = 1.
             one_hot[i][np.arange(num_productions, self.MAX_LEN),-1] = 1.
         self.one_hot = one_hot
-        return self.vae.encoderMV.predict(one_hot)[0]
+        if THEANO_MODE:
+            # return self.vae.encoderMV.predict(one_hot)[0]
+            return self.vae.encoderMV.predict(one_hot)
+        else:
+            self.one_hot = torch.tensor(self.one_hot).to(device)
+            return self.vae.encoder(self.one_hot)
+
 
     def _sample_using_masks(self, unmasked):
+        if not THEANO_MODE:
+            # unmasked = unmasked.detach().numpy()
+            unmasked = unmasked.cpu().detach().numpy()
         """ Samples a one-hot vector, masking at each timestep.
             This is an implementation of Algorithm ? in the paper. """
         eps = 1e-100
@@ -98,8 +118,12 @@ class ZincGrammarModel(object):
         for t in xrange(unmasked.shape[1]):
             next_nonterminal = [self._lhs_map[pop_or_nothing(a)] for a in S]
             mask = self._grammar.masks[next_nonterminal]
-            masked_output = np.exp(unmasked[:,t,:])*mask + eps
-            sampled_output = np.argmax(np.random.gumbel(size=masked_output.shape) + np.log(masked_output), axis=-1)
+            if STOCHASTIC:
+                masked_output = np.exp(unmasked[:,t,:])*mask + eps
+                sampled_output = np.argmax(np.random.gumbel(size=masked_output.shape) + np.log(masked_output), axis=-1)
+            else:
+                masked_output = np.exp(unmasked[:,t,:])*mask
+                sampled_output = np.argmax(masked_output, axis=-1)
             X_hat[np.arange(unmasked.shape[0]),t,sampled_output] = 1.0
 
             # Identify non-terminals in RHS of selected production, and
@@ -108,13 +132,28 @@ class ZincGrammarModel(object):
                           self._productions[i].rhs()) 
                    for i in sampled_output]
             for ix in xrange(S.shape[0]):
-                S[ix].extend(map(str, rhs[ix])[::-1])
+                # S[ix].extend(map(str, rhs[ix])[::-1])
+                S[ix].extend(list(map(str, rhs[ix]))[::-1])
         return X_hat # , ln_p
 
     def decode(self, z):
         """ Sample from the grammar decoder """
-        assert z.ndim == 2
-        unmasked = self.vae.decoder.predict(z)
+        if THEANO_MODE:
+            # pdb.set_trace()
+            assert z.ndim == 2
+        else:
+            assert len(z.size()) == 2
+        unmasked = None
+        if THEANO_MODE:    
+            unmasked = self.vae.decoder.predict(z)
+        else:
+            batch_size = z.size()[0]
+            h1, h2, h3 = self.vae.decoder.init_hidden(batch_size)
+            h1 = h1.to(device)
+            h2 = h2.to(device)
+            h3 = h3.to(device)
+            output, h1, h2, h3 = self.vae.decoder(z, h1, h2, h3)
+            unmasked = output    
         X_hat = self._sample_using_masks(unmasked)
         # Convert from one-hot to sequence of production rules
         prod_seq = [[self._productions[X_hat[index,t].argmax()] 
