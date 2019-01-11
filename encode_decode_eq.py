@@ -2,7 +2,7 @@ from __future__ import division
 import sys
 
 import equation_vae
-
+from  molecule_vae import THEANO_MODE
 import numpy as np
 from numpy import sin, exp, cos
 from matplotlib import pyplot as plt
@@ -26,8 +26,11 @@ eq = ['sin(x*2)',
 # NOTE: this operation returns the mean of the encoding distribution
 # if you would like it to sample from that distribution instead
 # replace line 62 in equation_vae.py with: return self.vae.encoder.predict(one_hot)
-z = grammar_model.encode(eq)
-
+z = None
+if THEANO_MODE:
+    z = grammar_model.encode(eq)
+else:
+    z, _none = grammar_model.encode(eq)
 # mol: decoded equations
 # NOTE: decoding is stochastic so calling this function many
 # times for the same latent point will return different answers
