@@ -2,7 +2,7 @@ from __future__ import division
 import sys
 
 import equation_vae
-
+from  molecule_vae import THEANO_MODE
 import numpy as np
 from numpy import sin, exp, cos
 from matplotlib import pyplot as plt
@@ -11,7 +11,8 @@ import pdb
 
 
 # 1. load grammar VAE
-grammar_weights = "pretrained/eq_vae_grammar_h100_c234_L25_E50_batchB.hdf5"
+# grammar_weights = "pretrained/eq_vae_grammar_h100_c234_L25_E50_batchB.hdf5"
+grammar_weights = "../save_model/grammar_ae_model.pt"
 print(grammar_weights)
 grammar_model = equation_vae.EquationGrammarModel(grammar_weights, latent_rep_size=25)
 
@@ -25,8 +26,11 @@ eq = ['sin(x*2)',
 # NOTE: this operation returns the mean of the encoding distribution
 # if you would like it to sample from that distribution instead
 # replace line 62 in equation_vae.py with: return self.vae.encoder.predict(one_hot)
-z = grammar_model.encode(eq)
-
+z = None
+if THEANO_MODE:
+    z = grammar_model.encode(eq)
+else:
+    z, _none = grammar_model.encode(eq)
 # mol: decoded equations
 # NOTE: decoding is stochastic so calling this function many
 # times for the same latent point will return different answers
@@ -34,6 +38,7 @@ z = grammar_model.encode(eq)
 domain = np.linspace(-10,10)
 for i, s in enumerate(grammar_model.decode(z)):
     print(s)
+    continue
     plt.figure()
     f = eval("lambda x: "+eq[i])
     f_hat = eval("lambda x: "+s)
@@ -46,7 +51,7 @@ for i, s in enumerate(grammar_model.decode(z)):
     plt.legend(["function", "reconstruction"])
     plt.title('%15s -> %s' % (eq[i], s))
 
-
+quit()
 
 
 # 3. the character VAE (https://github.com/maxhodak/keras-molecules)
