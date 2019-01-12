@@ -10,8 +10,11 @@ import re
 from six.moves import xrange
 
 import eq_grammar
-
+STOCHASTIC = False
 THEANO_MODE = False
+device = None
+if not THEANO_MODE:
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def get_zinc_tokenizer(cfg):
     long_tokens = filter(lambda a: len(a) > 1, cfg._lexical_index.keys())
@@ -92,13 +95,14 @@ class ZincGrammarModel(object):
         if THEANO_MODE:
             return self.vae.encoderMV.predict(one_hot)[0]
         else:
-            self.one_hot = torch.tensor(self.one_hot)
+            self.one_hot = torch.tensor(self.one_hot).to(device)
             return self.vae.encoder(self.one_hot)
 
 
     def _sample_using_masks(self, unmasked):
         if not THEANO_MODE:
-            unmasked = unmasked.detach().numpy()
+            # unmasked = unmasked.detach().numpy()
+            unmasked = unmasked.cpu().detach().numpy()
         """ Samples a one-hot vector, masking at each timestep.
             This is an implementation of Algorithm ? in the paper. """
         eps = 1e-100
@@ -113,8 +117,12 @@ class ZincGrammarModel(object):
         for t in xrange(unmasked.shape[1]):
             next_nonterminal = [self._lhs_map[pop_or_nothing(a)] for a in S]
             mask = self._grammar.masks[next_nonterminal]
-            masked_output = np.exp(unmasked[:,t,:])*mask + eps
-            sampled_output = np.argmax(np.random.gumbel(size=masked_output.shape) + np.log(masked_output), axis=-1)
+            if STOCHASTIC:
+                masked_output = np.exp(unmasked[:,t,:])*mask + eps
+                sampled_output = np.argmax(np.random.gumbel(size=masked_output.shape) + np.log(masked_output), axis=-1)
+            else:
+                masked_output = np.exp(unmasked[:,t,:])*mask
+                sampled_output = np.argmax(masked_output, axis=-1)
             X_hat[np.arange(unmasked.shape[0]),t,sampled_output] = 1.0
 
             # Identify non-terminals in RHS of selected production, and
@@ -139,6 +147,9 @@ class ZincGrammarModel(object):
         else:
             batch_size = z.size()[0]
             h1, h2, h3 = self.vae.decoder.init_hidden(batch_size)
+            h1 = h1.to(device)
+            h2 = h2.to(device)
+            h3 = h3.to(device)
             output, h1, h2, h3 = self.vae.decoder(z, h1, h2, h3)
             unmasked = output    
         X_hat = self._sample_using_masks(unmasked)

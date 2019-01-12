@@ -7,8 +7,8 @@ import numpy as np
 from numpy import sin, exp, cos
 from matplotlib import pyplot as plt
 import pdb
-
-
+import torch
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # 1. load grammar VAE
 # grammar_weights = "pretrained/eq_vae_grammar_h100_c234_L25_E50_batchB.hdf5"
@@ -31,6 +31,7 @@ if THEANO_MODE:
     z = grammar_model.encode(eq)
 else:
     z, _none = grammar_model.encode(eq)
+# pdb.set_trace()
 # mol: decoded equations
 # NOTE: decoding is stochastic so calling this function many
 # times for the same latent point will return different answers
