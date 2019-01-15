@@ -42,10 +42,10 @@ def main():
     model = MoleculeVAE()
 
     # 2. if this results file exists already load it
-    if os.path.isfile(model_save):
-        model.load(rules, model_save, latent_rep_size = args.latent_dim, hypers = params)
-    else:
-        model.create(rules, max_length=MAX_LEN, latent_rep_size = args.latent_dim, hypers = params)
+    # if False and os.path.isfile(model_save):
+    #    model.load(rules, model_save, latent_rep_size = args.latent_dim, hypers = params)
+    # else:
+    model.create(rules, max_length=MAX_LEN, latent_rep_size = args.latent_dim, hypers = params)
 
     # 3. only save best model found on a 10% validation set
     checkpointer = ModelCheckpoint(filepath = model_save,

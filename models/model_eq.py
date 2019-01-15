@@ -16,7 +16,7 @@ ind_of_ind_K = K.variable(G.ind_of_ind)
 
 MAX_LEN = 15
 DIM = G.D
-
+VAE_MODE = False
 
 class MoleculeVAE():
 
@@ -61,7 +61,10 @@ class MoleculeVAE():
 
         x2 = Input(shape=(max_length, charset_length))
         (z_m, z_l_v) = self._encoderMeanVar(x2, latent_rep_size, max_length)
-        self.encoderMV = Model(input=x2, output=[z_m, z_l_v])
+        if VAE_MODE:
+            self.encoderMV = Model(input=x2, output=[z_m, z_l_v])
+        else:
+            self.encoderMV = Model(input=x2, output=[z_m])
 
         if weights_file:
             self.autoencoder.load_weights(weights_file)
@@ -86,7 +89,9 @@ class MoleculeVAE():
         h = Dense(self.hypers['dense'], activation = 'relu', name='dense_1')(h)
 
         z_mean = Dense(latent_rep_size, name='z_mean', activation = 'linear')(h)
-        z_log_var = Dense(latent_rep_size, name='z_log_var', activation = 'linear')(h)
+        z_log_var = None
+        if VAE_MODE:
+            z_log_var = Dense(latent_rep_size, name='z_log_var', activation = 'linear')(h)
 
         return (z_mean, z_log_var) 
 
@@ -103,13 +108,20 @@ class MoleculeVAE():
         h = Dense(self.hypers['dense'], activation = 'relu', name='dense_1')(h)
 
         def sampling(args):
-            z_mean_, z_log_var_ = args
+            z_log_var_ = None
+            if VAE_MODE:
+                z_mean_, z_log_var_ = args
+            if not VAE_MODE:
+                z_mean_ = args[0]
+                return z_mean
             batch_size = K.shape(z_mean_)[0]
             epsilon = K.random_normal(shape=(batch_size, latent_rep_size), mean=0., std = epsilon_std)
             return z_mean_ + K.exp(z_log_var_ / 2) * epsilon
 
         z_mean = Dense(latent_rep_size, name='z_mean', activation = 'linear')(h)
-        z_log_var = Dense(latent_rep_size, name='z_log_var', activation = 'linear')(h)
+        z_log_var = None
+        if VAE_MODE:
+            z_log_var = Dense(latent_rep_size, name='z_log_var', activation = 'linear')(h)
 
         def conditional(x_true, x_pred):
             most_likely = K.argmax(x_true)
@@ -118,7 +130,7 @@ class MoleculeVAE():
             ix2 = tf.cast(ix2, tf.int32) # cast indices as ints 
             M2 = tf.gather_nd(masks_K, ix2) # get slices of masks_K with indices
             M3 = tf.reshape(M2, [-1,MAX_LEN,DIM]) # reshape them
-            P2 = tf.mul(K.exp(x_pred),M3) # apply them to the exp-predictions
+            P2 = tf.multiply(K.exp(x_pred),M3) # apply them to the exp-predictions
             P2 = tf.div(P2,K.sum(P2,axis=-1,keepdims=True)) # normalize predictions
             return P2
 
@@ -127,10 +139,15 @@ class MoleculeVAE():
             x = K.flatten(x)
             x_decoded_mean = K.flatten(x_decoded_mean)
             xent_loss = max_length * objectives.binary_crossentropy(x, x_decoded_mean)
-            kl_loss = - 0.5 * K.mean(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis = -1)
-            return xent_loss + kl_loss
-
-        return (vae_loss, Lambda(sampling, output_shape=(latent_rep_size,), name='lambda')([z_mean, z_log_var]))
+            if VAE_MODE:
+                kl_loss = - 0.5 * K.mean(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis = -1)
+                return xent_loss + kl_loss
+            return xent_loss
+        if VAE_MODE:
+            return (vae_loss, Lambda(sampling, output_shape=(latent_rep_size,), name='lambda')([z_mean, z_log_var]))
+        else:
+            # return (vae_loss, Lambda(sampling, output_shape=(latent_rep_size,), name='lambda')([z_mean]))
+             return (vae_loss, z_mean)
 
     def _buildDecoder(self, z, latent_rep_size, max_length, charset_length):
         h = BatchNormalization(name='batch_4')(z)

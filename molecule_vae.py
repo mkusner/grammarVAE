@@ -11,7 +11,7 @@ from six.moves import xrange
 
 import eq_grammar
 STOCHASTIC = False
-THEANO_MODE = False
+THEANO_MODE = True
 device = None
 if not THEANO_MODE:
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -93,7 +93,8 @@ class ZincGrammarModel(object):
             one_hot[i][np.arange(num_productions, self.MAX_LEN),-1] = 1.
         self.one_hot = one_hot
         if THEANO_MODE:
-            return self.vae.encoderMV.predict(one_hot)[0]
+            # return self.vae.encoderMV.predict(one_hot)[0]
+            return self.vae.encoderMV.predict(one_hot)
         else:
             self.one_hot = torch.tensor(self.one_hot).to(device)
             return self.vae.encoder(self.one_hot)
@@ -138,6 +139,7 @@ class ZincGrammarModel(object):
     def decode(self, z):
         """ Sample from the grammar decoder """
         if THEANO_MODE:
+            # pdb.set_trace()
             assert z.ndim == 2
         else:
             assert len(z.size()) == 2
