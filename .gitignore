@@ -7,3 +7,8 @@ data
 *.h5
 *.h5
 *.hdf5
+eq_vae_grammar_h100_c234_L25_E50_batchB.hdf5
+eq_vae_grammar_h100_c234_L25_E50_batchB.hdf5
+eq_vae_grammar_h100_c234_L25_E50_batchB.hdf5
+data/eq2_str_dataset.h5
+data/eq2_grammar_dataset.h5
