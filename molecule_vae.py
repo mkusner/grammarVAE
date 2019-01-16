@@ -1,6 +1,7 @@
 import nltk
 import numpy as np
-
+from six.moves import xrange
+import re
 import zinc_grammar
 import models.model_zinc
 import models.model_zinc_str
@@ -72,7 +73,7 @@ class ZincGrammarModel(object):
         """ Encode a list of smiles strings into the latent space """
         assert type(smiles) == list
         tokens = map(self._tokenize, smiles)
-        parse_trees = [self._parser.parse(t).next() for t in tokens]
+        parse_trees = [self._parser.parse(t).__next__() for t in tokens]
         productions_seq = [tree.productions() for tree in parse_trees]
         indices = [np.array([self._prod_map[prod] for prod in entry], dtype=int) for entry in productions_seq]
         one_hot = np.zeros((len(indices), self.MAX_LEN, self._n_chars), dtype=np.float32)
@@ -108,7 +109,7 @@ class ZincGrammarModel(object):
                           self._productions[i].rhs()) 
                    for i in sampled_output]
             for ix in xrange(S.shape[0]):
-                S[ix].extend(map(str, rhs[ix])[::-1])
+                S[ix].extend(list(map(str, rhs[ix]))[::-1])
         return X_hat # , ln_p
 
     def decode(self, z):

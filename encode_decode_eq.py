@@ -12,6 +12,7 @@ import pdb
 
 # 1. load grammar VAE
 grammar_weights = "pretrained/eq_vae_grammar_h100_c234_L25_E50_batchB.hdf5"
+grammar_weights = "eq_vae_grammar_h100_c234_L25_E50_batchB.hdf5"
 print(grammar_weights)
 grammar_model = equation_vae.EquationGrammarModel(grammar_weights, latent_rep_size=25)
 
@@ -33,7 +34,7 @@ z = grammar_model.encode(eq)
 # let's plot how well the true functions match the decoded functions
 domain = np.linspace(-10,10)
 for i, s in enumerate(grammar_model.decode(z)):
-    print(s)
+    print(eq[i]+" -->"+s)
     plt.figure()
     f = eval("lambda x: "+eq[i])
     f_hat = eval("lambda x: "+s)
