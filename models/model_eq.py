@@ -105,7 +105,9 @@ class MoleculeVAE():
         def sampling(args):
             z_mean_, z_log_var_ = args
             batch_size = K.shape(z_mean_)[0]
-            epsilon = K.random_normal(shape=(batch_size, latent_rep_size), mean=0., std = epsilon_std)
+            # epsilon = K.random_normal(shape=(batch_size, latent_rep_size), mean=0., std = epsilon_std)
+            # Above commented line gives error unknwown arguement 'std' hence updated it to below line
+            epsilon = K.random_normal(shape=(batch_size, latent_rep_size), mean=0., stddev = epsilon_std)
             return z_mean_ + K.exp(z_log_var_ / 2) * epsilon
 
         z_mean = Dense(latent_rep_size, name='z_mean', activation = 'linear')(h)
@@ -118,7 +120,9 @@ class MoleculeVAE():
             ix2 = tf.cast(ix2, tf.int32) # cast indices as ints 
             M2 = tf.gather_nd(masks_K, ix2) # get slices of masks_K with indices
             M3 = tf.reshape(M2, [-1,MAX_LEN,DIM]) # reshape them
-            P2 = tf.mul(K.exp(x_pred),M3) # apply them to the exp-predictions
+            # P2 = tf.mul(K.exp(x_pred),M3) # apply them to the exp-predictions
+            # Above commented line gives error method not found 'mul' hence updated it to below line
+            P2 = tf.multiply(K.exp(x_pred),M3) # apply them to the exp-predictions
             P2 = tf.div(P2,K.sum(P2,axis=-1,keepdims=True)) # normalize predictions
             return P2
 
