@@ -64,9 +64,11 @@ def main():
         shuffle = True,
         nb_epoch = args.epochs,
         batch_size = BATCH,
-        callbacks = [checkpointer, reduce_lr],
+        #callbacks = [checkpointer, reduce_lr],
+        callbacks = [reduce_lr],
         validation_split = 0.1
     )
+    model.save(model_save)
 
 if __name__ == '__main__':
     main()

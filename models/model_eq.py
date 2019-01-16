@@ -18,6 +18,10 @@ MAX_LEN = 15
 DIM = G.D
 VAE_MODE = True
 
+if VAE_MODE:
+    setattr(tf.contrib.rnn.GRUCell, '__deepcopy__', lambda self, _: self)
+    setattr(tf.contrib.rnn.BasicLSTMCell, '__deepcopy__', lambda self, _: self)
+    setattr(tf.contrib.rnn.MultiRNNCell, '__deepcopy__', lambda self, _: self)
 class MoleculeVAE():
 
     autoencoder = None
