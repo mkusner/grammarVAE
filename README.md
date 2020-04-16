@@ -5,6 +5,8 @@ This repository contains training and sampling code for the paper: <a href="http
 
 ## Requirements
 
+Python 2.7
+
 Install (CPU version) using `pip install -r requirements.txt`
 
 For GPU compatibility, replace the fourth line in requirements.txt with: https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-0.12.1-cp27-none-linux_x86_64.whl
